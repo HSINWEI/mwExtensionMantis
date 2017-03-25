@@ -116,7 +116,7 @@ function renderMantis( $input, $args, $mwParser )
 		$mwParser->getOutput()->updateCacheExpiry($wgMantisConf['MaxCacheTime']);
 	}
 
-	$columnNames = 'id:b.id,project:p.name,category:c.name,severity:b.severity,priority:b.priority,status:b.status,username:u.username,created:b.date_submitted,updated:b.last_updated,summary:b.summary';
+	$columnNames = 'id:b.id,project:p.name,category:c.name,severity:b.severity,priority:b.priority,status:b.status,username:u.username,created:b.date_submitted,updated:b.last_updated,summary:b.summary,target_version:b.target_version';
 
 	$conf['bugid']          = NULL;
 	$conf['table']          = 'sortable';
@@ -371,7 +371,7 @@ function renderMantis( $input, $args, $mwParser )
 	}
 
 	// build the SQL query
-	$query = "select b.id as id, p.name as project, c.name as category, b.severity as severity, b.priority as priority, b.status as status, u.username as username, b.date_submitted as created, b.last_updated as updated, b.summary as summary from ${tabprefix}category_table c inner join ${tabprefix}bug_table b on (b.category_id = c.id) inner join ${tabprefix}project_table p on (b.project_id = p.id) left outer join ${tabprefix}user_table u on (u.id = b.handler_id) ";
+	$query = "select b.id as id, p.name as project, c.name as category, b.severity as severity, b.priority as priority, b.status as status, u.username as username, b.date_submitted as created, b.last_updated as updated, b.summary as summary, b.target_version as target_version from ${tabprefix}category_table c inner join ${tabprefix}bug_table b on (b.category_id = c.id) inner join ${tabprefix}project_table p on (b.project_id = p.id) left outer join ${tabprefix}user_table u on (u.id = b.handler_id) ";
 
 	if ($conf['bugid'] == NULL)
 	{
@@ -439,7 +439,6 @@ function renderMantis( $input, $args, $mwParser )
 			}
 		}
 	}
-
 	if ($result = $db->query($query))
 	{
 		// check if there are any rows in resultset
@@ -576,6 +575,7 @@ function renderMantis( $input, $args, $mwParser )
 						}
 						$output .= sprintf("%s %s\n", getKeyOrValue($row[$colname], $mantis[$colname]), $assigned);
 						break;
+					case 'target_version':
 					case 'summary':
 						$output .= sprintf($format, $color, 'left');
 						$summary = $row[$colname];
@@ -615,10 +615,9 @@ function renderMantis( $input, $args, $mwParser )
 
 		$result->free();
 	}
-
 	$db->close();
 
-	//wfMessage("Test Message")->plain();
+	wfMessage("Test Message")->plain();
 	return $mwParser->recursiveTagParse($output);
 }
 ?>
